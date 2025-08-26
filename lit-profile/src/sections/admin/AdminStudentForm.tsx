@@ -1,79 +1,81 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useStudentQuery, useUpsertStudent } from "../../hooks/useStudentAdmin"
 import { uploadPublicFile } from "../../lib/upload"
+import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card"
+import { Input } from "../../components/ui/input"
+import { Label } from "../../components/ui/label"
+import { Textarea } from "../../components/ui/textarea"
+import { Button } from "../../components/ui/button"
+import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar"
 
 export function AdminStudentForm() {
-  const { data: student, isLoading } = useStudentQuery()
+  const { data: student } = useStudentQuery()
   const upsert = useUpsertStudent()
 
-  const [fullName, setFullName] = useState(student?.full_name ?? "")
-  const [institution, setInstitution] = useState(student?.institution ?? "")
-  const [bio, setBio] = useState(student?.bio ?? "")
+  const [fullName, setFullName] = useState("")
+  const [institution, setInstitution] = useState("")
+  const [bio, setBio] = useState("")
   const [uploading, setUploading] = useState(false)
 
-  // sync when query resolves
-  // (simple pattern; you can refine with useEffect deps)
-  if (!isLoading && student && fullName === "") {
-    setTimeout(() => {
+  useEffect(() => {
+    if (student) {
       setFullName(student.full_name ?? "")
       setInstitution(student.institution ?? "")
       setBio(student.bio ?? "")
-    }, 0)
-  }
+    }
+  }, [student])
 
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    upsert.mutate({
-      id: student?.id,
-      full_name: fullName,
-      institution,
-      bio,
-    })
-  }
-
-  const onAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
+  const onAvatarChange = async (file?: File) => {
     if (!file) return
     try {
       setUploading(true)
       const url = await uploadPublicFile({ file, bucket: "profile-media", prefix: "avatars" })
       upsert.mutate({ id: student?.id, avatar_url: url })
-    } catch (err: any) {
-      alert(err.message ?? "Upload failed")
+    } catch (e: any) {
+      alert(e.message ?? "Upload failed")
     } finally {
       setUploading(false)
     }
   }
 
   return (
-    <section className="rounded-2xl border p-4">
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="font-semibold">Student Profile</h2>
-        <label className="text-sm border rounded-md px-3 py-1 cursor-pointer">
-          {uploading ? "Uploading..." : "Change Avatar"}
-          <input type="file" accept="image/*" className="hidden" onChange={onAvatarChange} />
-        </label>
-      </div>
-
-      <form onSubmit={submit} className="grid gap-3 md:grid-cols-2">
-        <div className="md:col-span-2">
-          <label className="block text-sm mb-1">Full name</label>
-          <input className="w-full border rounded-md px-3 py-2" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
+    <Card>
+      <CardHeader className="flex-row items-center justify-between space-y-0">
+        <CardTitle>Student Profile</CardTitle>
+        <div className="flex items-center gap-3">
+          <Avatar className="h-12 w-12 rounded-2xl">
+            <AvatarImage src={student?.avatar_url ?? ""} />
+            <AvatarFallback>{(student?.full_name ?? "A").charAt(0)}</AvatarFallback>
+          </Avatar>
+          <Button variant="outline" disabled={uploading} onClick={() => document.getElementById("avatar-input")?.click()}>
+            {uploading ? "Uploading…" : "Change Avatar"}
+          </Button>
+          <input id="avatar-input" type="file" accept="image/*" className="hidden"
+                 onChange={(e) => onAvatarChange(e.target.files?.[0])}/>
         </div>
-        <div>
-          <label className="block text-sm mb-1">Institution</label>
-          <input className="w-full border rounded-md px-3 py-2" value={institution ?? ""} onChange={(e) => setInstitution(e.target.value)} />
-        </div>
-        <div className="md:col-span-2">
-          <label className="block text-sm mb-1">Bio</label>
-          <textarea className="w-full border rounded-md px-3 py-2 h-24" value={bio ?? ""} onChange={(e) => setBio(e.target.value)} />
-        </div>
-        <div className="md:col-span-2">
-          <button className="border rounded-md px-4 py-2" disabled={upsert.isPending}>
-            {upsert.isPending ? "Saving..." : "Save"}
-          </button>
-        </div>
-      </form>
-    </section>
+      </CardHeader>
+      <CardContent>
+        <form
+          onSubmit={(e) => { e.preventDefault(); upsert.mutate({ id: student?.id, full_name: fullName, institution, bio })}}
+          className="grid gap-4 md:grid-cols-2"
+        >
+          <div className="md:col-span-2 space-y-1.5">
+            <Label>Full name</Label>
+            <Input value={fullName} onChange={(e) => setFullName(e.target.value)} required />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Institution</Label>
+            <Input value={institution} onChange={(e) => setInstitution(e.target.value)} />
+          </div>
+          <div className="md:col-span-2 space-y-1.5">
+            <Label>Bio</Label>
+            <Textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={4}/>
+          </div>
+          <div className="md:col-span-2">
+            <Button type="submit">Save</Button>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
   )
 }

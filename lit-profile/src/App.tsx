@@ -3,6 +3,8 @@ import { useEffect, useState } from "react"
 import { Moon, Sun } from "lucide-react"
 import Profile from "./pages/Profile"
 import Admin from "./pages/Admin"
+import ProfilesIndex from "./pages/ProfilesIndex"
+import AdminStudent from "./pages/AdminStudent"
 
 export default function App() {
   const [theme, setTheme] = useState(() =>
@@ -22,6 +24,9 @@ export default function App() {
             <NavLink to="/" className={({isActive}) => `font-medium ${isActive ? "text-primary" : "text-muted-foreground"}`}>
               Profile
             </NavLink>
+            <NavLink to="/profiles" className={({isActive}) => `font-medium ${isActive ? "text-primary" : "text-muted-foreground"}`}>
+              Profiles
+            </NavLink>
             <NavLink to="/admin" className={({isActive}) => `font-medium ${isActive ? "text-primary" : "text-muted-foreground"}`}>
               Admin
             </NavLink>
@@ -38,7 +43,9 @@ export default function App() {
       <main className="container py-6">
         <Routes>
           <Route path="/" element={<Profile />} />
+          <Route path="/profiles" element={<ProfilesIndex />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/admin/:studentId" element={<AdminStudent />} />
         </Routes>
       </main>
     </div>

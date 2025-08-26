@@ -1,16 +1,20 @@
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "../lib/supabase"
+import { useCurrentStudent } from "../state/currentStudent"
 
 export function useStudent() {
+  const { currentStudentId } = useCurrentStudent()
+
   return useQuery({
-    queryKey: ["student"],
+    queryKey: ["student", currentStudentId ?? "first"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("students")
-        .select("*")
-        .order("created_at", { ascending: true })
-        .limit(1)
-        .single()
+      if (currentStudentId) {
+        const { data, error } = await supabase.from("students").select("*").eq("id", currentStudentId).single()
+        if (error) throw error
+        return data
+      }
+      // fallback to first
+      const { data, error } = await supabase.from("students").select("*").order("sort_order", { ascending: true }).limit(1).single()
       if (error) throw error
       return data
     },

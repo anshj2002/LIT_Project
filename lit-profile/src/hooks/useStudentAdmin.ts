@@ -1,32 +1,36 @@
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query"
-import { getFirstStudent, upsertStudent, type Student } from "../api/students"
+import { supabase } from "../lib/supabase"
+import { useCurrentStudent } from "../state/currentStudent"
 
 export function useStudentQuery() {
+  const { currentStudentId } = useCurrentStudent()
   return useQuery({
-    queryKey: ["student"],
-    queryFn: getFirstStudent,
+    queryKey: ["student-admin", currentStudentId],
+    enabled: !!currentStudentId,
+    queryFn: async () => {
+      const { data, error } = await supabase.from("students").select("*").eq("id", currentStudentId!).single()
+      if (error) throw error; return data
+    },
     staleTime: 60_000,
   })
 }
 
 export function useUpsertStudent() {
   const qc = useQueryClient()
+  const { currentStudentId } = useCurrentStudent()
   return useMutation({
-    mutationFn: (partial: Partial<Student> & { id?: string }) => upsertStudent(partial),
-    onMutate: async (partial) => {
-      await qc.cancelQueries({ queryKey: ["student"] })
-      const prev = qc.getQueryData<Student | null>(["student"])
-      // optimistic: merge
-      qc.setQueryData(["student"], (old: Student | null) => ({ ...(old ?? {} as Student), ...partial } as Student))
-      return { prev }
-    },
-    onError: (_err, _vars, ctx) => {
-      if (ctx?.prev !== undefined) {
-        qc.setQueryData(["student"], ctx.prev)
+    mutationFn: async (patch: any) => {
+      if (currentStudentId) {
+        const { error } = await supabase.from("students").update(patch).eq("id", currentStudentId)
+        if (error) throw error
+      } else {
+        const { error } = await supabase.from("students").insert(patch)
+        if (error) throw error
       }
     },
-    onSettled: () => {
-      qc.invalidateQueries({ queryKey: ["student"] })
-    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["student-admin", currentStudentId] })
+      qc.invalidateQueries({ queryKey: ["student", currentStudentId ?? "first"] })
+    }
   })
 }
