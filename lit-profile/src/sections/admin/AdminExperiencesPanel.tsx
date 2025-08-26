@@ -5,10 +5,10 @@ import { useExperiencesQuery, useCreateExperience, useUpdateExperience, useDelet
 export function AdminExperiencesPanel() {
   const { data: student } = useStudentQuery()
   const studentId = student?.id || ""
-  const { data: experiences } = useExperiencesQuery(studentId)
-  const create = useCreateExperience(studentId)
-  const update = useUpdateExperience(studentId)
-  const remove = useDeleteExperience(studentId)
+  const { data: experiences } = useExperiencesQuery()
+  const create = useCreateExperience()
+  const update = useUpdateExperience()
+  const remove = useDeleteExperience()
 
   const [company, setCompany] = useState("")
   const [role, setRole] = useState("")

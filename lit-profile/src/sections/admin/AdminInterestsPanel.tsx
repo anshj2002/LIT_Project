@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { useStudentQuery } from "../../hooks/useStudentAdmin"
 import { listInterests, createInterest, deleteInterest, type Interest } from "../../api/interests"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"

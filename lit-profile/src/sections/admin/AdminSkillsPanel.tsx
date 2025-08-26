@@ -10,7 +10,7 @@ import { Label } from "../../components/ui/label"
 export function AdminSkillsPanel() {
   const { data: student } = useStudentQuery()
   const studentId = student?.id
-  const { data: skills, refetch } = useSkillsQuery(studentId)
+  const { data: skills, refetch } = useSkillsQuery()
 
   const [name, setName] = useState("")
   const [level, setLevel] = useState(70)

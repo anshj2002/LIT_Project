@@ -23,7 +23,13 @@ export default function Admin() {
           <CardContent className="space-y-3">
             <Input placeholder="you@company.com" value={email} onChange={(e) => setEmail(e.target.value)} />
             <Button onClick={async () => {
-              const { error } = await supabase.auth.signInWithOtp({ email })
+              const emailRedirectTo = import.meta.env.DEV
+                ? `${window.location.origin}/admin`
+                : `https://YOUR-SITE.netlify.app/admin`
+              const { error } = await supabase.auth.signInWithOtp({
+                email,
+                options: { emailRedirectTo }
+              })
               if (error) alert(error.message)
               else alert("Magic link sent. Check your email.")
             }}>Send magic link</Button>
