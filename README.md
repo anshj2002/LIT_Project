@@ -113,7 +113,7 @@ flowchart TB
 | 👤 **Individual Profile** | `/profile/:slug` | Detailed student showcase |
 | ⚙️ **Admin Dashboard** | `/admin` | Content management system |
 
-**Demo Site:** `https://your-lit-app.netlify.app`
+**Demo Site:** `https://68ad7ec9096cd942541ce652--lit-pro.netlify.app/`
 
 ---
 
@@ -129,7 +129,7 @@ flowchart TB
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/lit-student-profile.git
+git clone https://github.com/anshj2002/lit-student-profile.git
 cd lit-student-profile/lit-profile
 
 # Install dependencies
@@ -331,8 +331,8 @@ lit-profile/
 ### Authentication Setup
 
 Configure your Supabase Auth URLs:
-- **Site URL**: `https://your-app.netlify.app`
-- **Redirect URLs**: `https://your-app.netlify.app/admin`
+- **Site URL**: `https://68ad7ec9096cd942541ce652--lit-pro.netlify.app/`
+- **Redirect URLs**: `https://68ad7ec9096cd942541ce652--lit-pro.netlify.app/admin`
 
 ---
 
